@@ -2,9 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-	
-	<link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=tj2i6baf72s0&format=png&color=000000" />
-	
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=tj2i6baf72s0&format=png&color=000000" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#1e1e2f">
     <title>PenseQuiz - Passatempo</title>
@@ -21,7 +19,7 @@
 
     <script type="text/babel">
         const questions = [
-            { clue: "Capital do Brasil", answer: "Brasília", options: ["Brasília", "Rio de Janeiro", "São Paulo", "Salvador"], hint: "Cidade planejada onde fica o Congresso Nacional." },
+             { clue: "Capital do Brasil", answer: "Brasília", options: ["Brasília", "Rio de Janeiro", "São Paulo", "Salvador"], hint: "Cidade planejada onde fica o Congresso Nacional." },
             { clue: "Ator brasileiro famoso por 'Tropa de Elite'", answer: "Wagner Moura", options: ["Wagner Moura", "Selton Mello", "Rodrigo Santoro", "Lázaro Ramos"], hint: "Interpretou o Capitão Nascimento." },
             { clue: "Escritor de 'Dom Casmurro'", answer: "Machado de Assis", options: ["Machado de Assis", "José de Alencar", "Graciliano Ramos", "João Cabral"], hint: "Maior escritor brasileiro do século XIX." },
             { clue: "Presidente do Brasil em 2003-2010", answer: "Lula", options: ["Lula", "FHC", "Dilma", "Collor"], hint: "Seu nome é Luiz Inácio." },
@@ -677,10 +675,10 @@
         "answer": "Revolta dos Malês",
         "options": ["Revolta dos Malês", "Revolução Farroupilha", "Abolição", "Revolta da Armada"],
         "hint": "Levante de escravizados muçulmanos na Bahia."
-    }
+    },
 		
-		
-		];
+            // Adicione aqui as 100 perguntas adicionais fornecidas anteriormente, se desejar
+        ];
 
         const shuffleArray = (array) => [...array].sort(() => Math.random() - 0.5);
 
@@ -705,6 +703,7 @@
             const [feedback, setFeedback] = React.useState(null);
             const [hintUsed, setHintUsed] = React.useState(false);
             const [hintText, setHintText] = React.useState('');
+            const gameRef = React.useRef(null);
 
             React.useEffect(() => {
                 try {
@@ -731,6 +730,12 @@
                 }, 1000);
                 return () => clearInterval(timer);
             }, [currentIndex, gameState]);
+
+            React.useEffect(() => {
+                if (gameState === 'gameOver' && gameRef.current) {
+                    gameRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, [gameState]);
 
             const startQuiz = () => {
                 setGameState('playing');
@@ -812,12 +817,12 @@
 
             if (error) {
                 return (
-                    <div className="max-w-2xl w-full bg-gray-800 p-6 rounded-lg shadow-lg text-center">
-                        <h1 className="text-3xl font-bold mb-4">Erro</h1>
+                    <div className="max-w-2xl w-full parchment-bg p-6 rounded-lg shadow-lg text-center">
+                        <h1 className="text-3xl font-bold mb-4 text-blue-900">Erro</h1>
                         <p className="text-red-500">{error}</p>
                         <button
                             onClick={resetGame}
-                            className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition duration-300"
+                            className="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-blue-900 py-2 rounded transition duration-300"
                         >
                             Tentar Novamente
                         </button>
@@ -827,11 +832,11 @@
 
             if (gameState === 'start') {
                 return (
-                    <div className="max-w-2xl w-full bg-gray-800 p-6 rounded-lg shadow-lg text-center">
-                        <h1 className="text-3xl font-bold mb-4">PenseQuiz - Passatempo</h1>
+                    <div className="max-w-2xl w-full parchment-bg p-6 rounded-lg shadow-lg text-center">
+                        <h1 className="text-3xl font-bold mb-4 text-blue-900 pulse">PenseQuiz - Passatempo</h1>
                         <button
                             onClick={startQuiz}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded transition duration-300"
+                            className="w-full bg-yellow-500 hover:bg-yellow-600 text-blue-900 py-3 rounded transition duration-300"
                         >
                             Iniciar
                         </button>
@@ -841,22 +846,25 @@
 
             if (gameState === 'gameOver') {
                 return (
-                    <div className="max-w-2xl w-full bg-gray-800 p-6 rounded-lg shadow-lg text-center">
-                        <h1 className="text-3xl font-bold mb-4">Fim do Jogo!</h1>
-                        <p className="text-xl mb-4">
-                            Você acertou {correctAnswers} de {shuffledQuestions.length} perguntas!
-                        </p>
-                        {answers.length > 0 && !answers[answers.length - 1].isCorrect && (
-                            <p className="text-red-500 mb-4">
-                                Resposta correta: {answers[answers.length - 1].correct}
+                    <div className="game-container">
+                        <div ref={gameRef} className="max-w-2xl w-full parchment-bg p-6 rounded-lg shadow-lg text-center">
+                            <h1 className="text-3xl font-bold mb-4 text-blue-900 shake">Fim do Jogo!</h1>
+                            <p className="text-xl mb-4">
+                                Você acertou {correctAnswers} de {shuffledQuestions.length} perguntas!
                             </p>
-                        )}
-                        <button
-                            onClick={resetGame}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition duration-300"
-                        >
-                            Jogar Novamente
-                        </button>
+                            {answers.length > 0 && !answers[answers.length - 1].isCorrect && (
+                                <p className="text-red-500 mb-4">
+                                    Resposta correta: {answers[answers.length - 1].correct}
+                                </p>
+                            )}
+                            <button
+                                onClick={resetGame}
+                                className="w-full bg-yellow-500 hover:bg-yellow-600 text-blue-900 py-2 rounded transition duration-300"
+                            >
+                                Jogar Novamente
+                            </button>
+                            <p className="text-blue-900 mt-4">Provérbios 1:7 🕊️ "O temor do Senhor é o princípio do conhecimento."</p>
+                        </div>
                     </div>
                 );
             }
@@ -865,39 +873,39 @@
             const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
 
             return (
-                <div className="max-w-2xl w-full bg-gray-800 p-6 rounded-lg shadow-lg">
-                    <h1 className="text-3xl font-bold mb-4 text-center">PenseQuiz - Passatempo</h1>
+                <div className="max-w-2xl w-full parchment-bg p-6 rounded-lg shadow-lg">
+                    <h1 className="text-3xl font-bold mb-4 text-center text-blue-900 fade-in">PenseQuiz - Passatempo</h1>
                     <div className="mb-4">
-                        <div className="w-full bg-gray-600 rounded-full h-2.5">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
                             <div
-                                className="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
+                                className="bg-yellow-500 h-2.5 rounded-full progress-bar"
                                 style={{ width: `${progress}%` }}
                             ></div>
                         </div>
-                        <p className="text-sm text-gray-400 mt-1">
+                        <p className="text-sm text-gray-500 mt-1">
                             Pergunta {currentIndex + 1} de {shuffledQuestions.length}
                         </p>
                     </div>
                     <div className="flex justify-between items-center mb-4">
-                        <p className="text-lg font-semibold">Tempo restante: {timeLeft}s</p>
-                        <p className="text-lg">Acertos: {correctAnswers}</p>
+                        <p className="text-lg font-semibold text-blue-900">Tempo restante: {timeLeft}s</p>
+                        <p className="text-lg text-blue-900">Acertos: {correctAnswers}</p>
                     </div>
-                    <p className="text-xl mb-6 animate-fade-in">{currentQuestion.clue}</p>
+                    <p className="text-xl mb-6 text-blue-900 fade-in">{currentQuestion.clue}</p>
                     {hintText && (
-                        <p className="text-sm text-gray-300 mb-4 italic">{hintText}</p>
+                        <p className="text-sm text-gray-500 mb-4 italic">{hintText}</p>
                     )}
                     <div className="space-y-3">
                         {currentQuestion.options.map((option) => (
                             <button
                                 key={option}
                                 onClick={() => handleAnswer(option)}
-                                className={`w-full py-3 rounded transition duration-300 ${
+                                className={`w-full py-3 rounded transition duration-300 option ${
                                     feedback && feedback.isCorrect && option === feedback.correctOption
-                                        ? 'btn-correta'
+                                        ? 'correct'
                                         : feedback && !feedback.isCorrect && option === feedback.selectedOption
-                                        ? 'btn-incorreta'
-                                        : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                } disabled:bg-gray-600 disabled:cursor-not-allowed`}
+                                        ? 'wrong'
+                                        : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                } disabled:bg-gray-400 disabled:cursor-not-allowed`}
                                 disabled={feedback}
                             >
                                 {option}
@@ -907,7 +915,7 @@
                     <button
                         onClick={showHint}
                         className={`mt-4 w-full py-2 rounded transition duration-300 ${
-                            hintUsed ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white'
+                            hintUsed ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white'
                         }`}
                         disabled={hintUsed}
                     >
@@ -937,6 +945,66 @@
         }
         .btn-incorreta {
             background-color: #dc3545 !important;
+        }
+        .option {
+            display: block;
+            margin: 10px auto;
+            padding: 12px 25px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 300px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .option:hover {
+            background-color: #1565c0;
+        }
+        .correct {
+            background-color: #4CAF50 !important;
+        }
+        .wrong {
+            background-color: #f44336 !important;
+        }
+        .parchment-bg {
+            background: url('https://www.transparenttextures.com/patterns/paper.png'), #f5e8c7;
+        }
+        .game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+        }
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .progress-bar {
+            transition: width 0.1s linear;
+        }
+        .fade-in {
+            animation: fadeIn 1s;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
     </style>
 </body>
